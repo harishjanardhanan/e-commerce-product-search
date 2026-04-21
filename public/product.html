@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Detail — Amazon Scanner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #070a10;
+            --bg2: #0d1117;
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-b: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-h: rgba(255, 255, 255, 0.15);
+            --accent: #f90;
+            --accent2: #ff6b35;
+            --blue: #4f8ef7;
+            --green: #22d3a0;
+            --red: #ff4757;
+            --text: #eef0f6;
+            --text2: #8892a4;
+            --text3: #50596a;
+            --font: 'Inter', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Fixed ambient orbs ───────────────────────────────────────── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            top: -150px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(249, 144, 0, .18), transparent);
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            bottom: -80px;
+            right: -80px;
+            background: radial-gradient(circle, rgba(79, 142, 247, .15), transparent);
+        }
+
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            top: 40%;
+            left: 55%;
+            background: radial-gradient(circle, rgba(34, 211, 160, .1), transparent);
+        }
+
+        /* ── Top nav ──────────────────────────────────────────────────── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(7, 10, 16, .9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 40px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .nav-logo span:first-child {
+            font-size: 20px;
+        }
+
+        .nav-logo span:last-child {
+            font-size: 15px;
+            color: var(--text2);
+        }
+
+        .nav-logo strong {
+            color: var(--text);
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--glass-b);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            transition: background .2s, color .2s, border-color .2s;
+            cursor: pointer;
+        }
+
+        .nav-back:hover {
+            background: rgba(255, 255, 255, .1);
+            color: var(--text);
+            border-color: var(--border-h);
+        }
+
+        /* ── Page wrapper ─────────────────────────────────────────────── */
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 32px 80px;
+        }
+
+        /* ── Error state ──────────────────────────────────────────────── */
+        .error-state {
+            text-align: center;
+            padding: 100px 20px;
+            color: var(--text3);
+        }
+
+        .error-state .icon {
+            font-size: 52px;
+            margin-bottom: 16px;
+        }
+
+        .error-state h2 {
+            font-size: 20px;
+            color: var(--text2);
+            margin-bottom: 8px;
+        }
+
+        /* ── Hero row ─────────────────────────────────────────────────── */
+        .hero-row {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 48px;
+            align-items: flex-start;
+            margin-bottom: 56px;
+        }
+
+        @media (max-width: 720px) {
+            .hero-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Image panel */
+        .img-panel {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+            position: sticky;
+            top: 80px;
+        }
+
+        .img-panel img {
+            width: 100%;
+            max-width: 220px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .img-placeholder {
+            font-size: 72px;
+            opacity: .15;
+        }
+
+        /* Info panel */
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .product-category {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .product-title {
+            font-size: clamp(20px, 3vw, 30px);
+            font-weight: 800;
+            line-height: 1.25;
+            letter-spacing: -.5px;
+            color: var(--text);
+        }
+
+        /* Stats row */
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .stat-chip {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background: var(--glass-b);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 18px;
+            min-width: 90px;
+            transition: border-color .2s;
+        }
+
+        .stat-chip:hover {
+            border-color: var(--border-h);
+        }
+
+        .stat-chip .lbl {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: var(--text3);
+        }
+
+        .stat-chip .val {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-chip .val.price {
+            color: var(--green);
+            font-family: var(--mono);
+        }
+
+        .stat-chip .val.rating {
+            color: var(--accent);
+        }
+
+        .stat-chip .val.avail {
+            font-size: 13px;
+        }
+
+        .stat-chip .val.avail.instock {
+            color: var(--green);
+        }
+
+        .stat-chip .val.avail.nostock {
+            color: var(--red);
+        }
+
+        /* Rating bar */
+        .rating-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .stars {
+            color: var(--accent);
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .rating-label {
+            font-size: 13px;
+            color: var(--text2);
+        }
+
+        /* CTA */
+        .cta-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .btn-amazon {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 12px 24px;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(255, 153, 0, .25);
+            transition: transform .15s, box-shadow .15s;
+        }
+
+        .btn-amazon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 153, 0, .4);
+        }
+
+        /* ── Section titles ───────────────────────────────────────────── */
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── Features section ─────────────────────────────────────────── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-bottom: 56px;
+        }
+
+        .feature-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            transition: border-color .2s, background .2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-h);
+            background: var(--glass-b);
+        }
+
+        .feature-bullet {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(249, 144, 0, .2), rgba(255, 107, 53, .1));
+            border: 1px solid rgba(249, 144, 0, .25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            margin-top: 1px;
+        }
+
+        .feature-text {
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--text2);
+        }
+
+        /* ── Specs table ──────────────────────────────────────────────── */
+        .specs-section {
+            margin-bottom: 56px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .spec-row {
+            display: flex;
+            background: var(--glass);
+            transition: background .15s;
+        }
+
+        .spec-row:hover {
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .spec-key {
+            width: 46%;
+            padding: 13px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text3);
+            border-right: 1px solid var(--border);
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .spec-val {
+            flex: 1;
+            padding: 13px 16px;
+            font-size: 13px;
+            color: var(--text);
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        /* No specs */
+        .no-specs {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text3);
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--glass);
+        }
+
+        /* ── ASIN badge ───────────────────────────────────────────────── */
+        .asin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text3);
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <nav>
+        <a class="nav-logo" href="/">
+            <span>⚡</span>
+            <span>Amazon <strong>Scanner</strong></span>
+        </a>
+        <button class="nav-back" onclick="history.back()">← Back to results</button>
+    </nav>
+
+    <main id="main">
+        <div class="error-state" id="errorState" style="display:none">
+            <div class="icon">📭</div>
+            <h2>Product not found</h2>
+            <p>Go back to the scanner and click a product row.</p>
+        </div>
+        <div id="content"></div>
+    </main>
+
+    <script>
+        (function () {
+            const params = new URLSearchParams(location.search);
+            const asin = params.get('asin');
+            if (!asin) { showError(); return; }
+
+            const raw = localStorage.getItem('scanner_product_' + asin);
+            if (!raw) { showError(); return; }
+
+            let p;
+            try { p = JSON.parse(raw); } catch { showError(); return; }
+
+            render(p);
+
+            function showError() {
+                document.getElementById('errorState').style.display = 'block';
+            }
+
+            function render(p) {
+                document.title = (p.title || 'Product') + ' — Amazon Scanner';
+
+                const ratingNum = parseFloat(p.rating);
+                const stars = !isNaN(ratingNum)
+                    ? '★'.repeat(Math.round(ratingNum)) + '☆'.repeat(5 - Math.round(ratingNum))
+                    : '';
+
+                const availText = (p.availability || '').toLowerCase();
+                const availClass = availText.includes('stock') && !availText.includes('out')
+                    ? 'instock' : availText.includes('out') ? 'nostock' : '';
+
+                const specEntries = Object.entries(p.specs || {});
+                const features = (p.features || []).filter(f => f.trim());
+
+                // Try to extract a category hint from first feature or title
+                const brandHint = p.brand ? `By ${p.brand.replace(/^Visit the |Store$/g, '').trim()}` : '';
+
+                const content = document.getElementById('content');
+                content.innerHTML = `
+          <!-- Hero -->
+          <div class="hero-row">
+            <div class="img-panel">
+              ${p.image
+                        ? `<img src="${p.image}" alt="${escHtml(p.title || '')}" />`
+                        : `<div class="img-placeholder">📦</div>`}
+            </div>
+            <div class="info-panel">
+              ${brandHint ? `<div class="product-category">${escHtml(brandHint)}</div>` : ''}
+              <h1 class="product-title">${escHtml(p.title || 'Unknown Product')}</h1>
+
+              ${!isNaN(ratingNum) ? `
+              <div class="rating-bar-wrap">
+                <span class="stars">${stars}</span>
+                <span class="rating-label">${ratingNum.toFixed(1)} out of 5${p.reviews ? ' · ' + p.reviews : ''}</span>
+              </div>` : ''}
+
+              <div class="stats-row">
+                ${p.price && p.price !== 'N/A' ? `
+                <div class="stat-chip">
+                  <span class="lbl">Price</span>
+                  <span class="val price">${escHtml(p.price)}</span>
+                </div>` : ''}
+
+                ${p.availability ? `
+                <div class="stat-chip">
+                  <span class="lbl">Availability</span>
+                  <span class="val avail ${availClass}">${escHtml(p.availability)}</span>
+                </div>` : ''}
+
+                ${specEntries.length > 0 ? `
+                <div class="stat-chip">
+                  <span class="lbl">Total Specs</span>
+                  <span class="val">${specEntries.length}</span>
+                </div>` : ''}
+              </div>
+
+              ${p.asin ? `<div class="asin-badge">ASIN: ${escHtml(p.asin)}</div>` : ''}
+
+              <div class="cta-row">
+                ${p.url ? `<a class="btn-amazon" href="${p.url}" target="_blank" rel="noopener">↗ View on Amazon</a>` : ''}
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Features -->
+          ${features.length > 0 ? `
+          <div style="margin-bottom:56px">
+            <div class="section-label">Key Features</div>
+            <div class="features-grid">
+              ${features.map((f, i) => `
+                <div class="feature-card">
+                  <div class="feature-bullet">${i + 1}</div>
+                  <div class="feature-text">${escHtml(f)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>` : ''}
+
+          <!-- Technical Specifications -->
+          <div class="specs-section">
+            <div class="section-label">Technical Specifications</div>
+            ${specEntries.length > 0 ? `
+            <div class="specs-grid">
+              ${specEntries.map(([k, v]) => `
+                <div class="spec-row">
+                  <div class="spec-key">${escHtml(k)}</div>
+                  <div class="spec-val">${escHtml(v)}</div>
+                </div>
+              `).join('')}
+            </div>` : `
+            <div class="no-specs">No technical specifications were found for this product.</div>
+            `}
+          </div>
+        `;
+            }
+
+            function escHtml(s) {
+                return String(s || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+        })();
+    </script>
+</body>
+
+</html>

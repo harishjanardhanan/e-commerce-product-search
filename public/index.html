@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Spec Scanner — Amazon & Flipkart</title>
+  <meta name="description"
+    content="Scan Amazon or Flipkart search results and extract full product specifications into a sortable, filterable table." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Background orbs -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">Product <strong>Scanner</strong></span>
+      </div>
+      <div class="header-badge">Amazon &amp; Flipkart</div>
+    </div>
+  </header>
+
+  <!-- Hero / Input Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Extract Product Specs at Scale</h1>
+      <p class="hero-sub">Paste an Amazon <em>or</em> Flipkart search URL → we'll scan up to 100 products and pull every
+        specification
+        automatically.</p>
+
+      <form id="scanForm" class="scan-form">
+        <div class="input-wrapper">
+          <span class="input-icon">🔗</span>
+          <input type="url" id="urlInput"
+            placeholder="https://www.amazon.in/s?k=wireless+headphones  or  https://www.flipkart.com/search?q=headphones"
+            autocomplete="off" spellcheck="false" required />
+          <button type="button" id="clearBtn" class="clear-btn" title="Clear">✕</button>
+        </div>
+        <div class="form-controls">
+          <div class="limit-control">
+            <label for="limitInput">Max products</label>
+            <input type="number" id="limitInput" min="1" max="100" value="20" />
+          </div>
+          <button type="submit" id="scanBtn" class="btn-scan">
+            <span class="btn-icon">🔍</span>
+            <span class="btn-text">Start Scan</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Progress Section -->
+  <section id="progressSection" class="progress-section hidden">
+    <div class="progress-card glass">
+      <div class="progress-header">
+        <div class="status-dot pulsing" id="statusDot"></div>
+        <span id="statusText">Initializing…</span>
+        <button id="stopBtn" class="btn-stop">■ Stop</button>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-meta">
+        <span id="progressCount">0 / 0 products scraped</span>
+        <span id="progressPct">0%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toolbar -->
+  <section id="toolbar" class="toolbar hidden">
+    <!-- Row 1: Search + Actions -->
+    <div class="toolbar-row">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <span>🔎</span>
+          <input type="text" id="filterInput" placeholder="Search all columns…" />
+        </div>
+        <div class="stat-pill" id="statPill">0 products</div>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn-tool" id="exportCsvBtn" title="Download CSV">⬇ Export CSV</button>
+        <button class="btn-tool" id="clearTableBtn" title="Clear results">🗑 Clear</button>
+      </div>
+    </div>
+
+    <!-- Row 2: Sort + Column Filter -->
+    <div class="toolbar-row toolbar-row-2">
+      <!-- Sort controls -->
+      <div class="control-group">
+        <span class="ctrl-label">Sort by</span>
+        <select id="sortColSelect" class="ctrl-select">
+          <option value="">— Column —</option>
+          <option value="Title">Title</option>
+          <option value="Brand">Brand</option>
+          <option value="Price">Price</option>
+          <option value="Rating">Rating</option>
+          <option value="Reviews">Reviews</option>
+          <option value="Availability">Availability</option>
+        </select>
+        <button id="sortDirBtn" class="ctrl-dir-btn" title="Toggle direction">↑ Asc</button>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Multi-column filter builder -->
+      <div class="control-group" id="filterBuilder">
+        <span class="ctrl-label">Filter by</span>
+        <select id="filterColSelect" class="ctrl-select">
+          <option value="">— Column —</option>
+          <option value="Title">Title</option>
+          <option value="Brand">Brand</option>
+          <option value="Price">Price</option>
+          <option value="Rating">Rating</option>
+          <option value="Reviews">Reviews</option>
+          <option value="Availability">Availability</option>
+        </select>
+        <select id="filterColValue" class="ctrl-select" disabled>
+          <option value="">— Value —</option>
+        </select>
+        <button id="addFilterBtn" class="ctrl-add-btn" disabled>+ Add</button>
+      </div>
+
+      <button id="clearFiltersBtn" class="btn-clear-filters">✕ Clear filters</button>
+    </div>
+
+    <!-- Active filter chips row -->
+    <div id="filterChipsRow" class="filter-chips-row hidden"></div>
+  </section>
+
+
+  <!-- Results Table -->
+  <section id="resultsSection" class="results-section hidden">
+    <div class="table-container">
+      <table id="resultsTable">
+        <thead id="tableHead">
+          <!-- Dynamic headers injected by JS -->
+        </thead>
+        <tbody id="tableBody">
+          <!-- Dynamic rows injected by JS -->
+        </tbody>
+      </table>
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">📭</div>
+        <p>No products match your filter.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Detail Modal -->
+  <div id="detailModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-panel glass">
+      <div class="modal-header">
+        <h2 id="modalTitle">Product Details</h2>
+        <button id="modalClose" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
