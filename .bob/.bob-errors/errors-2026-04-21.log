@@ -1,0 +1,15 @@
+
+================================================================================
+ERROR LOGGED: 2026-04-21T09:27:22.538Z
+================================================================================
+Error Name: Error
+Error Message: Connection failed for 'carbon-mcp': Streamable HTTP error: Error POSTing to endpoint: {"error":"Invalid token","detail":"\"exp\" claim timestamp check failed | Re-auth required: re-run the authorization flow to obtain a new auth code and session ID, then retry with the new Bearer token and X-MCP-Session."}
+
+Stack Trace:
+Error: Connection failed for 'carbon-mcp': Streamable HTTP error: Error POSTing to endpoint: {"error":"Invalid token","detail":"\"exp\" claim timestamp check failed | Re-auth required: re-run the authorization flow to obtain a new auth code and session ID, then retry with the new Bearer token and X-MCP-Session."}
+    at iur (file:///opt/homebrew/lib/node_modules/bobshell/bundle/bob.js:3503:10291)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async kxe.connect (file:///opt/homebrew/lib/node_modules/bobshell/bundle/bob.js:3503:13137)
+    at async file:///opt/homebrew/lib/node_modules/bobshell/bundle/bob.js:3503:17293
+================================================================================
+
